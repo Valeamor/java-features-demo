@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.channels.Selector;
+import java.nio.channels.Pipe;
 import java.util.Objects;
 import org.junit.Test;
 
@@ -137,12 +137,51 @@ public class NewIO {
   }
 
   @Test
-  public void selector() throws IOException {
-    Selector selector = Selector.open(); // creating a selector
-  }
+  public void pipe() throws IOException {
+    Pipe pipe = Pipe.open();
+    Thread targetThread = new Thread(() -> {
+      Pipe.SourceChannel sourceChannel = pipe.source();
+      while (true) {
+        ByteBuffer buf = ByteBuffer.allocate(48);
+        try {
+          int bytesRead = sourceChannel.read(buf);
+          if (bytesRead > 0) {
+            buf.flip();
+            System.out.print("read data: ");
+            while (buf.hasRemaining()) {
+              System.out.print((char) buf.get());
+            }
+            buf.clear();
+            System.out.println();
+          }
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+    });
 
-  @Test
-  public void socketChannel() {
+    targetThread.start();
 
+    // send data to targetThread
+    Pipe.SinkChannel sinkChannel = pipe.sink();
+    while (true) {
+      String newData = "time is " + System.currentTimeMillis();
+      ByteBuffer buf = ByteBuffer.allocate(48);
+      buf.clear();
+      buf.put(newData.getBytes());
+      buf.flip();
+      while (buf.hasRemaining()) {
+        try {
+          sinkChannel.write(buf);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
   }
 }

@@ -7,8 +7,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -71,14 +69,5 @@ public class LanguageEnhancements {
     } catch (IOException | IllegalArgumentException e) {
     } catch (Exception e) {
     }
-  }
-
-  @Test
-  public void testPath() {
-    Path path = Paths.get("/Users/sion");
-    System.out.println("Number of Nodes:" + path.getNameCount());
-    System.out.println("File Name:" + path.getFileName());
-    System.out.println("File Root:" + path.getRoot());
-    System.out.println("File Parent:" + path.getParent());
   }
 }
